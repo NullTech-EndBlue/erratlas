@@ -2,6 +2,21 @@
   "name": "erratlas",
   "version": "0.1.0",
   "description": "Anatomy of AI agent tool failures: parse session logs from any agent, classify every failed tool call, and separate 'the model can't' from 'the model fumbled'.",
+  "author": {
+    "name": "NullTech-EndBlue",
+    "email": "nulltech1024@gmail.com",
+    "url": "https://github.com/NullTech-EndBlue"
+  },
+  "contributors": [
+    {
+      "name": "NullTech-EndBlue",
+      "url": "https://github.com/NullTech-EndBlue"
+    },
+    {
+      "name": "DeepSeek Harness (AI agent)",
+      "url": "https://github.com/NullTech-EndBlue/erratlas"
+    }
+  ],
   "type": "module",
   "bin": {
     "erratlas": "bin/erratlas.mjs"
