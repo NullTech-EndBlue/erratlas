@@ -1,9 +1,10 @@
 {
   "name": "codex",
-  "note": "Codex CLI rollouts under ~/.codex/sessions. There is no reliable error flag, so failures are inferred from the output text. Treat the numbers as a lower bound.",
+  "note": "Codex CLI rollouts under ~/.codex/sessions (one JSONL per session: session_meta / turn_context / response_item / event_msg). Verified against public rollouts: agentlogs/agentlogs, FankChen/tracecrate, dosu-ai/decant, wibus-wee/huihua. Codex has no is_error field for shell calls, so failures are inferred from the output (Process exited with code N, nested exit_code, payload.is_error). Treat the failure count as a lower bound.",
   "root": "~/.codex/sessions",
   "include": [
-    "**/*.jsonl"
+    "**/*.jsonl",
+    "**/*.jsonl.zst"
   ],
   "time": "timestamp",
   "records": [
@@ -21,6 +22,19 @@
       "args": "arguments"
     },
     {
+      "kind": "call",
+      "where": {
+        "type": "response_item"
+      },
+      "each": "payload",
+      "eachWhere": {
+        "type": "custom_tool_call"
+      },
+      "id": "call_id",
+      "tool": "name",
+      "args": "input"
+    },
+    {
       "kind": "result",
       "where": {
         "type": "response_item"
@@ -30,8 +44,28 @@
         "type": "function_call_output"
       },
       "id": "call_id",
-      "error": "__never__",
-      "errorPattern": "^(Error|error:|Traceback \\(most recent|\\[exit code: [1-9])",
+      "error": [
+        "is_error",
+        "output.is_error"
+      ],
+      "errorPattern": "\\[exit code: [1-9]|Process exited with code [1-9]|^Error:|Traceback \\(most recent|command not found",
+      "text": "output"
+    },
+    {
+      "kind": "result",
+      "where": {
+        "type": "response_item"
+      },
+      "each": "payload",
+      "eachWhere": {
+        "type": "custom_tool_call_output"
+      },
+      "id": "call_id",
+      "error": [
+        "is_error",
+        "output.is_error"
+      ],
+      "errorPattern": "\\[exit code: [1-9]|Process exited with code [1-9]|^Error:|Traceback \\(most recent|command not found",
       "text": "output"
     }
   ]

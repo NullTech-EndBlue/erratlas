@@ -36,7 +36,7 @@
 ## 待办
 
 - [x] Claude Code preset 验完（2026-11-06，用公开 transcript）→ 发现并修掉一个真 bug
-- [ ] Codex preset 还是没验（老大自己装 codex 试；本机没有 ~/.codex）
+- [x] Codex preset 验完（2026-11-06，用公开 rollout）→ 适配器为此改了多 spec 支持
 - [ ] `npm publish`（需要本地登录）
 - [ ] 配套视频（另一个会话在做）
 ## 2026-11-06 · Claude Code preset 用公开样例验证
@@ -61,3 +61,31 @@ is_error 不在 block 顶层，而是嵌在 content 对象里（stdout / stderr 
 3. 补 4 条 Claude Code 措辞规则：String to replace not found in file、Found N matches of the string to replace、File has not been read yet、File has been modified since read。
 
 fixture 用真实形状重写（结构照真实案例，内容自造，不含任何第三方数据），测试 15 → 16 全过。
+## 2026-11-06 · Codex preset 用公开样例验证
+
+老大登不上 Codex，同样走公开素材。四个仓库的 rollout：`agentlogs/agentlogs`、
+`FankChen/tracecrate`、`dosu-ai/decant`、`wibus-wee/huihua`。
+
+**真实结构（和 Claude Code 完全不同）**
+
+- 外层：`{timestamp, type: session_meta | turn_context | response_item | event_msg, payload}`
+- 调用：`payload.type = function_call`（`name` / `arguments` 是 JSON 字符串 / `call_id`）
+- 还有第二套：`payload.type = custom_tool_call`（`name` / `input` / `call_id`），输出是 `custom_tool_call_output`
+- 结果文本三种形态：
+  - 字符串：`Chunk ID..\nProcess exited with code 0\nOutput:\n...`
+  - 对象：`{stdout, exit_code}`
+  - **JSON 字符串套 JSON**：`{"output": "...", "metadata": {"exit_code": 0}}`
+
+**没有通用的错误字段。** 只有个别案例带 `payload.is_error` 或 `output.error`；
+shell 调用失败全靠文本里的 `Process exited with code N`。所以 codex 的失败率只能是下限。
+
+适配器为此改了三处：
+
+1. 一个 mapping 现在可以有多条 call / result spec（codex 有两套工具调用；DSH 和 Claude Code 各一套）；
+2. `asText` 认识 `{stdout,stderr,exit_code}` 与 `metadata.exit_code`，非 0 时补一行 `[exit code: N]`；
+3. 以 `{` 或 `[` 开头的字符串会先尝试 JSON.parse 再取文本（codex 的 output 是 JSON 字符串）。
+
+**踩的坑（记下来免得再犯）**：preset 里写 errorPattern 时，JS 字符串 `"\[exit code"` 里的 `\[`
+会退化成 `[`，整个正则变成字符类，于是**所有**输出都判成失败。测试立刻抓到——写正则一律用 `\\[`。
+
+fixture 用真实形状重写（内容自造），测试 16 → 17 全过。

@@ -62,3 +62,22 @@ test('claude-code preset handles real transcript shapes', () => {
   assert.equal(byTool.Read.model, 'claude-demo');
   assert.ok(res.recs.every((r) => r.t > 0), 'timestamps parsed');
 });
+test('codex preset handles rollouts with two call families', () => {
+  const mapping = JSON.parse(fs.readFileSync(path.join(here, '..', 'presets', 'codex.json'), 'utf8'));
+  const adapter = makeAdapter(mapping);
+  const res = scanTree({ root: path.join(here, 'fixtures', 'codex'), adapter: adapter, noCache: true });
+  assert.equal(res.recs.length, 4, 'four tool results');
+  const execs = res.recs.filter((r) => r.tool === 'exec_command');
+  const patch = res.recs.find((r) => r.tool === 'apply_patch');
+  assert.equal(execs.length, 3);
+  assert.ok(patch, 'custom_tool_call family is picked up');
+  // Process exited with code 0 must stay a success
+  assert.equal(execs.filter((r) => r.ie === 0).length, 1);
+  // exit code 1 in the output text, and payload.is_error, must both be failures
+  assert.equal(execs.filter((r) => r.ie === 1).length, 2);
+  const missing = res.recs.find((r) => (r.tx || '').includes('missing.yaml'));
+  assert.ok(missing && missing.ie === 1, 'stderr text is kept for failures');
+  // custom_tool_call_output wraps JSON in a string with metadata.exit_code
+  assert.equal(patch.ie, 0);
+  assert.ok(patch.tl > 0, 'unwrapped nested output text counts as content');
+});

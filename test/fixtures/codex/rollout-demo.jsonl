@@ -1,0 +1,10 @@
+{"timestamp":"2026-10-02T09:00:00.000Z","type":"session_meta","payload":{"id":"s-demo","cwd":"/home/dev/proj"}}
+{"timestamp":"2026-10-02T09:00:01.000Z","type":"turn_context","payload":{"model":"codex-demo"}}
+{"timestamp":"2026-10-02T09:00:02.000Z","type":"response_item","payload":{"type":"function_call","name":"exec_command","arguments":"{\"cmd\":\"ls\"}","call_id":"call_ok"}}
+{"timestamp":"2026-10-02T09:00:03.000Z","type":"response_item","payload":{"type":"function_call_output","call_id":"call_ok","output":"Chunk ID: a1\nWall time: 0.01 seconds\nProcess exited with code 0\nOutput:\nREADME.md"}}
+{"timestamp":"2026-10-02T09:00:04.000Z","type":"response_item","payload":{"type":"function_call","name":"exec_command","arguments":"{\"cmd\":\"cat missing.yaml\"}","call_id":"call_fail"}}
+{"timestamp":"2026-10-02T09:00:05.000Z","type":"response_item","payload":{"type":"function_call_output","call_id":"call_fail","output":"Chunk ID: b2\nWall time: 0.02 seconds\nProcess exited with code 1\nOutput:\ncat: missing.yaml: No such file or directory"}}
+{"timestamp":"2026-10-02T09:00:06.000Z","type":"response_item","payload":{"type":"custom_tool_call","status":"completed","call_id":"call_patch","name":"apply_patch","input":"*** Begin Patch\n*** End Patch"}}
+{"timestamp":"2026-10-02T09:00:07.000Z","type":"response_item","payload":{"type":"custom_tool_call_output","call_id":"call_patch","output":"{\"output\":\"Success. Updated the following files:\\nM /home/dev/proj/a.rs\\n\",\"metadata\":{\"exit_code\":0,\"duration_seconds\":0}}"}}
+{"timestamp":"2026-10-02T09:00:08.000Z","type":"response_item","payload":{"type":"function_call","name":"exec_command","arguments":"{\"cmd\":\"pwd\"}","call_id":"call_denied"}}
+{"timestamp":"2026-10-02T09:00:09.000Z","type":"response_item","payload":{"type":"function_call_output","call_id":"call_denied","output":{"error":"denied"},"is_error":true}}

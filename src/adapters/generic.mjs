@@ -20,20 +20,28 @@ function getPath(obj, expr) {
 
 function asText(v) {
   if (v === undefined || v === null) return '';
-  if (typeof v === 'string') return v;
-  if (typeof v === 'object' && !Array.isArray(v) && ('stdout' in v || 'stderr' in v)) {
-    return [v.stdout, v.stderr].filter((x) => typeof x === 'string' && x.length).join('\n');
+  if (typeof v === 'string') {
+    const s = v.trim();
+    if (s.length > 1 && (s[0] === '{' || s[0] === '[') && (s[s.length - 1] === '}' || s[s.length - 1] === ']')) {
+      try { return asText(JSON.parse(s)); } catch { return v; }
+    }
+    return v;
   }
   if (Array.isArray(v)) {
-    let s = '';
-    for (const x of v) {
-      if (typeof x === 'string') s += x;
-      else if (x && typeof x.text === 'string') s += x.text;
-      else if (x && typeof x.content === 'string') s += x.content;
-    }
-    return s || JSON.stringify(v);
+    const parts = v.map((x) => asText(x)).filter((x) => x !== '');
+    return parts.length ? parts.join('\n') : JSON.stringify(v);
   }
-  if (typeof v === 'object') return JSON.stringify(v);
+  if (typeof v === 'object') {
+    if ('error' in v) return 'Error: ' + (typeof v.error === 'string' ? v.error : JSON.stringify(v.error));
+    const bits = [];
+    if (typeof v.stdout === 'string' && v.stdout) bits.push(v.stdout);
+    if (typeof v.stderr === 'string' && v.stderr) bits.push(v.stderr);
+    if (typeof v.output === 'string' && !bits.length) bits.push(asText(v.output));
+    let code = typeof v.exit_code === 'number' ? v.exit_code : (v.metadata && typeof v.metadata.exit_code === 'number' ? v.metadata.exit_code : null);
+    let text = bits.join('\n');
+    if (code !== null && code !== 0) text += (text ? '\n' : '') + '[exit code: ' + code + ']';
+    return text || JSON.stringify(v);
+  }
   return String(v);
 }
 
@@ -51,9 +59,9 @@ export function makeAdapter(mapping) {
   if (!mapping || !Array.isArray(mapping.records)) {
     throw new Error('mapping must include a records[] array');
   }
-  const callSpec = mapping.records.find((r) => r.kind === 'call');
-  const resultSpec = mapping.records.find((r) => r.kind === 'result');
-  if (!callSpec || !resultSpec) throw new Error('mapping needs one kind:"call" and one kind:"result" record spec');
+  const callSpecs = mapping.records.filter((r) => r.kind === 'call');
+  const resultSpecs = mapping.records.filter((r) => r.kind === 'result');
+  if (!callSpecs.length || !resultSpecs.length) throw new Error('mapping needs at least one kind:"call" and one kind:"result" record spec');
 
   return {
     name: mapping.name || 'generic',
@@ -73,7 +81,8 @@ export function makeAdapter(mapping) {
         try { o = JSON.parse(line); } catch { continue; }
         const t = mapping.time ? getPath(o, mapping.time) : o.timestamp || o.time || 0;
         // calls
-        if (matches(o, callSpec.where)) {
+        for (const callSpec of callSpecs) {
+          if (!matches(o, callSpec.where)) continue;
           const holder = callSpec.each ? getPath(o, callSpec.each) : o;
           const items = Array.isArray(holder) ? holder : [holder];
           for (const it of items) {
@@ -88,7 +97,8 @@ export function makeAdapter(mapping) {
           }
         }
         // results
-        if (matches(o, resultSpec.where)) {
+        for (const resultSpec of resultSpecs) {
+          if (!matches(o, resultSpec.where)) continue;
           const holder = resultSpec.each ? getPath(o, resultSpec.each) : o;
           const items = Array.isArray(holder) ? holder : [holder];
           for (const it of items) {
@@ -106,8 +116,9 @@ export function makeAdapter(mapping) {
             if (!isErr && resultSpec.errorPattern) isErr = new RegExp(resultSpec.errorPattern, 'i').test(text);
             const model = call.m || getPath(o, resultSpec.model) || curModel;
             if (call.m) curModel = call.m;
+            const tt = typeof t === 'number' ? t : (Date.parse(t) || 0);
             const rec = {
-              t: typeof t === 'number' ? t : (Date.parse(t) || 0),
+              t: tt,
               tool: call.n || '?', model, sid: meta.sid, proj: meta.proj,
               ie: isErr ? 1 : 0, en: '', ec: '', tl: text.length,
             };

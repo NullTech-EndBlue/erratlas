@@ -149,8 +149,12 @@ and Codex CLI.
   content as a string or a block array, and `is_error` either on the block or nested inside
   a `{stdout, stderr, is_error}` content object for Bash. That nesting is what silently breaks
   naive parsers — if every Bash call looks successful in your output, this is why.
-- The `codex` preset is still unverified: Codex rollouts carry no reliable error flag, so
-  failures are inferred from output text. Run `--list` first; 0 records means the paths are off.
+- The `codex` preset is **verified against public rollouts** (agentlogs/agentlogs,
+  FankChen/tracecrate, dosu-ai/decant, wibus-wee/huihua): `response_item` records with a
+  `payload`, two call families (`function_call` / `custom_tool_call`), and outputs that are
+  strings, `{stdout, exit_code}` objects, or JSON-in-a-string with `metadata.exit_code`.
+  Codex has **no error flag for shell calls** — failures are inferred from
+  `Process exited with code N` and friends, so treat the count as a lower bound.
 - Cross-agent wording is normalized (`String to replace not found in file` and
   `old_string was not found` map to the same cause), but the rule set is finite.
 - Classification is a rule set, not a model. Unknown failures land in `Z-other` on
