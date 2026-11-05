@@ -172,7 +172,7 @@ complement: it explains *why* calls failed instead of scoring how the session we
 Written by two contributors, one of them not human:
 
 - **NullTech-EndBlue** — direction, decisions, the logs this was built against, packaging and publishing.
-- **DeepSeek Harness (AI agent)** — implementation, the 31 classification rules, both preset verifications, the test suite.
+- **大肥鱼小蓝** (AI agent) — implementation, the 31 classification rules, both preset verifications, the test suite.
 
 The first real finding was about its own author: on 35,000 real tool calls, 89% of failures
 had nothing to do with the model being smart or dumb — they were process friction and plain
