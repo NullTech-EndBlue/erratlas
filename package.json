@@ -1,0 +1,43 @@
+{
+  "name": "erratlas",
+  "version": "0.1.0",
+  "description": "Anatomy of AI agent tool failures: parse session logs from any agent, classify every failed tool call, and separate 'the model can't' from 'the model fumbled'.",
+  "type": "module",
+  "bin": {
+    "erratlas": "bin/erratlas.mjs"
+  },
+  "main": "src/index.mjs",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "presets/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.15"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.mjs\"",
+    "demo": "node bin/erratlas.mjs --demo",
+    "self": "node bin/erratlas.mjs --root ~/.dsh/sessions --top 20 --day --silent --sessions"
+  },
+  "keywords": [
+    "agent",
+    "llm",
+    "logs",
+    "observability",
+    "postmortem",
+    "claude-code",
+    "codex",
+    "ai"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NullTech-EndBlue/erratlas.git"
+  }
+}

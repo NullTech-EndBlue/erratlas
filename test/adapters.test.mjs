@@ -1,0 +1,46 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import fs from 'node:fs';
+import os from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { scanTree } from '../src/scan.mjs';
+import { makeAdapter } from '../src/adapters/generic.mjs';
+import * as dsh from '../src/adapters/dsh.mjs';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+
+test('dsh adapter reads tool results and keeps the isError ground truth', () => {
+  const res = scanTree({ root: path.join(here, 'fixtures', 'dsh'), adapter: dsh, noCache: true });
+  assert.equal(res.recs.length, 2);
+  assert.equal(res.recs[0].ie, 1);
+  assert.equal(res.recs[0].tool, 'read');
+  assert.equal(res.recs[0].model, 'demo-model');
+  assert.equal(res.recs[0].proj, 'proj-abc');
+  assert.equal(res.recs[1].ie, 0);
+  assert.deepEqual(res.recs[1].sm, ['exit-marker']);
+});
+
+test('cache reuses unchanged files', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'erratlas-'));
+  const cachePath = path.join(dir, 'cache.json');
+  const root = path.join(here, 'fixtures', 'dsh');
+  const a = scanTree({ root, adapter: dsh, cachePath });
+  assert.equal(a.stats.scanned, 1);
+  const b = scanTree({ root, adapter: dsh, cachePath });
+  assert.equal(b.stats.scanned, 0);
+  assert.equal(b.stats.reused, 1);
+  assert.equal(b.recs.length, a.recs.length);
+});
+
+test('generic adapter maps claude-code style jsonl', () => {
+  const mapping = JSON.parse(fs.readFileSync(path.join(here, '..', 'presets', 'claude-code.json'), 'utf8'));
+  const adapter = makeAdapter(mapping);
+  const res = scanTree({ root: path.join(here, 'fixtures', 'generic'), adapter: adapter, noCache: true });
+  assert.equal(res.recs.length, 2);
+  assert.equal(res.recs[0].tool, 'Bash');
+  assert.equal(res.recs[0].ie, 1);
+  assert.equal(res.recs[0].model, 'claude-demo');
+  assert.equal(res.recs[1].ie, 0);
+  assert.ok(res.recs[0].t > 0);
+});

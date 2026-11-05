@@ -1,0 +1,38 @@
+{
+  "name": "codex",
+  "note": "Codex CLI rollouts under ~/.codex/sessions. There is no reliable error flag, so failures are inferred from the output text. Treat the numbers as a lower bound.",
+  "root": "~/.codex/sessions",
+  "include": [
+    "**/*.jsonl"
+  ],
+  "time": "timestamp",
+  "records": [
+    {
+      "kind": "call",
+      "where": {
+        "type": "response_item"
+      },
+      "each": "payload",
+      "eachWhere": {
+        "type": "function_call"
+      },
+      "id": "call_id",
+      "tool": "name",
+      "args": "arguments"
+    },
+    {
+      "kind": "result",
+      "where": {
+        "type": "response_item"
+      },
+      "each": "payload",
+      "eachWhere": {
+        "type": "function_call_output"
+      },
+      "id": "call_id",
+      "error": "__never__",
+      "errorPattern": "^(Error|error:|Traceback \\(most recent|\\[exit code: [1-9])",
+      "text": "output"
+    }
+  ]
+}

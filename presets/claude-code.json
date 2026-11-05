@@ -1,0 +1,38 @@
+{
+  "name": "claude-code",
+  "note": "Claude Code writes one JSONL per session under ~/.claude/projects. Tool results live in user turns and carry is_error. This preset is derived from the documented record shape; verify against your own logs with --list first.",
+  "root": "~/.claude/projects",
+  "include": [
+    "**/*.jsonl"
+  ],
+  "time": "timestamp",
+  "records": [
+    {
+      "kind": "call",
+      "where": {
+        "type": "assistant"
+      },
+      "each": "message.content[]",
+      "eachWhere": {
+        "type": "tool_use"
+      },
+      "id": "id",
+      "tool": "name",
+      "args": "input",
+      "model": "message.model"
+    },
+    {
+      "kind": "result",
+      "where": {
+        "type": "user"
+      },
+      "each": "message.content[]",
+      "eachWhere": {
+        "type": "tool_result"
+      },
+      "id": "tool_use_id",
+      "error": "is_error",
+      "text": "content"
+    }
+  ]
+}

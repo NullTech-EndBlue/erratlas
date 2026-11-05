@@ -1,0 +1,8 @@
+{"type":"session","seq":1,"time":1759800000000,"data":{"id":"s1"}}
+{"type":"request/context","seq":2,"time":1759800000000,"data":{"provider":"demo","model":"demo-model"}}
+{"type":"assistant/message","seq":3,"time":1759800001000,"data":{"message":{"source":{"kind":"model","provider":"demo","model":"demo-model"},"content":[{"type":"tool-call","id":"c1","name":"read","arguments":"{\"file_path\":\"a.txt\"}"}]}}}
+{"type":"tool/call","seq":4,"time":1759800001000,"data":{"callId":"c1","turn":1,"step":1,"name":"read","arguments":"{\"file_path\":\"a.txt\"}"}}
+{"type":"tool/result","seq":5,"time":1759800002000,"data":{"message":{"toolCallId":"c1","isError":true,"content":[{"type":"text","text":"Error: cannot read \"a.txt\": not found"}]}}}
+{"type":"assistant/message","seq":6,"time":1759800003000,"data":{"message":{"source":{"model":"demo-model"},"content":[{"type":"tool-call","id":"c2","name":"write","arguments":"{}"}]}}}
+{"type":"tool/call","seq":7,"time":1759800003000,"data":{"callId":"c2","turn":1,"step":2,"name":"write","arguments":"{}"}}
+{"type":"tool/result","seq":8,"time":1759800004000,"data":{"message":{"toolCallId":"c2","isError":false,"content":[{"type":"text","text":"ok\n[exit code: 1]"}]}}}
