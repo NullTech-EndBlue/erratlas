@@ -183,20 +183,20 @@ fumbling. The tool exists because that number was surprising.
 MIT
 
 ---
+## 中文文档 / Chinese docs
 
-## 中文简介
+完整中文说明见 **[README.zh-CN.md](README.zh-CN.md)** —— 判定口径、静默失败、两个 preset 各自踩过的坑、
+映射文件字段表、常见问题，都是中文。
 
-`erratlas` 把你 AI agent 的会话日志翻成一份「错题本」：每一次工具调用失败都被归到 31 个原因之一，
-再汇总成 11 个责任归属（不是模型不行，是流程摩擦/手滑/工具边界）。
-
-它和 `inspecto` 这类「给会话打分」的工具互补：那个回答「这次干得好不好」，
-这个回答「为什么错、错在谁身上」。
+一句话：`erratlas` 把你 AI agent 的会话日志翻成一份「错题本」——每次工具调用失败被归到 31 个原因之一，
+再汇总成 11 个责任归属。它和 [inspecto](https://www.npmjs.com/package/inspecto) 这类打分工具互补：
+那个回答「这次干得好不好」，这个回答「为什么错、错在谁身上」。
 
 ```bash
-npx erratlas --demo                               # 先看效果，不需要任何日志
-erratlas --root ~/.dsh/sessions --day --silent    # 扫自己的日志
+npx erratlas --demo --zh                          # 中文标签，不需要任何日志
+erratlas --root ~/.dsh/sessions --zh --silent     # 扫自己的日志
 erratlas --md report.md                           # 出一份 markdown 报告
 ```
 
-最值得看的一栏是 `--silent`：工具标记为成功、但输出里带着 `[exit code: 1]` 或 traceback 的调用。
-这类失败在普通的错误率统计里完全看不见。
+最该看的是 `--silent`：工具标记为成功、输出里却带着 `[exit code: 1]` 或 traceback 的那些调用。
+这类失败在普通错误率统计里完全隐形。
