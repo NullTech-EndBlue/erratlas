@@ -89,3 +89,30 @@ shell 调用失败全靠文本里的 `Process exited with code N`。所以 codex
 会退化成 `[`，整个正则变成字符类，于是**所有**输出都判成失败。测试立刻抓到——写正则一律用 `\\[`。
 
 fixture 用真实形状重写（内容自造），测试 16 → 17 全过。
+## 发布清单（npm）
+
+当前状态：`npm publish --dry-run` 通过，15 个文件 / 18.9 kB；**只差登录**（本机没有 `~/.npmrc`，`npm whoami` 报 ENEEDAUTH）。
+
+路线 A · 浏览器登录（最快）
+
+```bash
+export PATH="/c/Program Files/nodejs:$PATH"   # 本机 PATH 里没有 node/npm
+cd /d/EndBlue/DSH/erratlas
+npm login            # 终端给一个 URL，浏览器点确认（npm 11 走网页登录）
+npm publish
+```
+
+路线 B · Token（没有浏览器时）
+
+1. npmjs.com → 头像 → Access Tokens → Generate New Token → 选 **Automation**（免 OTP）
+2. 写进 `~/.npmrc`：`//registry.npmjs.org/:_authToken=npm_xxxxxxxx`
+3. `npm publish`
+
+注意事项
+
+- 账号必须先验证邮箱，否则发不了公开包。
+- 开了 2FA（Authenticator）的话，`npm publish` 要加 `--otp=123456`；Automation token 可以跳过。
+- 发之前再确认一次包名没被抢：`npm view erratlas version`（E404 = 还空着）。
+- 同一个版本号不能重发。改动后先改 `package.json` 的 version，再 `git tag v0.1.1`。
+- 发完验证：`npm view erratlas` / `npx erratlas --demo`。
+- `package.json` 里 `repository` 已指向 GitHub，npm 页面会自动关联。
