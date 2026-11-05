@@ -17,11 +17,15 @@ export function core(text) {
 
 export const RULES = [
   [/file has not been read/i, 'A-edit-need-read'],
+  [/file has not been read yet/i, 'A-edit-need-read'],
   [/file changed since it was read/i, 'A-edit-stale'],
+  [/file has been modified since read/i, 'A-edit-stale'],
   [/file no longer exists/i, 'A-edit-gone'],
   [/old_string and new_string must differ/i, 'B-edit-noop'],
   [/old_string matched \d+ times/i, 'B-edit-ambiguous'],
+  [/found \d+ matches of the string to replace/i, 'B-edit-ambiguous'],
   [/old_string was not found/i, 'B-edit-no-match'],
+  [/string to replace not found in file/i, 'B-edit-no-match'],
   [/exceeds the \d+px limit/i, 'G-unreadable-file'],
   [/binary file|invalid UTF-8 text/i, 'G-unreadable-file'],
   [/unsupported content type/i, 'G-unsupported-content'],

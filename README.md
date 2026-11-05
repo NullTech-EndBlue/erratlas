@@ -6,7 +6,8 @@ Most agent observability tools tell you what you spent, or grade a session 0–1
 erratlas asks a narrower question: **when a tool call failed, whose fault was it —
 the model, the environment, or the harness itself?**
 
-It reads the session logs your agent already writes, and turns 35,000 tool calls
+It reads the session logs your agent already writes (DeepSeek Harness built in; Claude Code,
+Codex and anything else through a mapping file), and turns tens of thousands of tool calls
 into a ranked list of causes you can actually act on.
 
 ## What it does
@@ -143,9 +144,15 @@ and Codex CLI.
 
 ## Honest limits
 
-- The `claude-code` and `codex` presets were written from documented record shapes and
-  have **not** been verified against a live install. Run `--list` first; if you see 0
-  records, the mapping paths are off and you can fix them without touching code.
+- The `claude-code` preset is **verified against public transcripts** (agentlogs/agentlogs,
+  dosu-ai/decant, FankChen/tracecrate, yfge/TalkReplay): `tool_use` / `tool_result` blocks,
+  content as a string or a block array, and `is_error` either on the block or nested inside
+  a `{stdout, stderr, is_error}` content object for Bash. That nesting is what silently breaks
+  naive parsers — if every Bash call looks successful in your output, this is why.
+- The `codex` preset is still unverified: Codex rollouts carry no reliable error flag, so
+  failures are inferred from output text. Run `--list` first; 0 records means the paths are off.
+- Cross-agent wording is normalized (`String to replace not found in file` and
+  `old_string was not found` map to the same cause), but the rule set is finite.
 - Classification is a rule set, not a model. Unknown failures land in `Z-other` on
   purpose — check that bucket before trusting the totals.
 - Silent-failure detection is heuristic by nature; it tells you where to look, not

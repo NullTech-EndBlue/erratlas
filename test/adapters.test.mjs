@@ -44,3 +44,21 @@ test('generic adapter maps claude-code style jsonl', () => {
   assert.equal(res.recs[1].ie, 0);
   assert.ok(res.recs[0].t > 0);
 });
+test('claude-code preset handles real transcript shapes', () => {
+  const mapping = JSON.parse(fs.readFileSync(path.join(here, '..', 'presets', 'claude-code.json'), 'utf8'));
+  const adapter = makeAdapter(mapping);
+  const res = scanTree({ root: path.join(here, 'fixtures', 'claude-code'), adapter: adapter, noCache: true });
+  assert.equal(res.recs.length, 4, 'four tool calls, noise records ignored');
+  const byTool = Object.fromEntries(res.recs.map((r) => [r.tool, r]));
+  // is_error nested inside the {stdout,stderr,is_error} content object (Bash)
+  assert.equal(byTool.Bash.ie, 1, 'bash failure must be caught through content.is_error');
+  assert.ok(byTool.Bash.tx.includes('No such file'), 'stderr is folded into the result text');
+  // content as an array of text blocks, block level is_error:false
+  assert.equal(byTool.Read.ie, 0);
+  // block level is_error:true with plain string content
+  assert.equal(byTool.Edit.ie, 1);
+  // no is_error field at all means success
+  assert.equal(byTool.Write.ie, 0);
+  assert.equal(byTool.Read.model, 'claude-demo');
+  assert.ok(res.recs.every((r) => r.t > 0), 'timestamps parsed');
+});

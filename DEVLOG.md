@@ -35,6 +35,29 @@
 
 ## 待办
 
-- [ ] Claude Code / Codex preset 用真实日志验一遍（本机没有 `~/.claude`、`~/.codex`）
+- [x] Claude Code preset 验完（2026-11-06，用公开 transcript）→ 发现并修掉一个真 bug
+- [ ] Codex preset 还是没验（老大自己装 codex 试；本机没有 ~/.codex）
 - [ ] `npm publish`（需要本地登录）
 - [ ] 配套视频（另一个会话在做）
+## 2026-11-06 · Claude Code preset 用公开样例验证
+
+本机没有 `~/.claude`，改从 GitHub 找公开 transcript（不装任何东西）：
+
+| 仓库 | 文件 | 贡献了什么 |
+|---|---|---|
+| agentlogs/agentlogs | fixtures/claudecode/crud.jsonl | 真实会话主结构 + 噪声记录类型 |
+| dosu-ai/decant | fixtures/claude/sample.jsonl | 顶层 is_error 布尔字段 |
+| FankChen/tracecrate | examples/claude.jsonl | 精简版：type/timestamp/message |
+| yfge/TalkReplay | fixtures/claude/tool_use_result.jsonl | **Bash 结果的关键差异** |
+
+**验证结论：preset 大体对，但有一处会静默出错。** Claude Code 的 Bash 工具结果里，
+is_error 不在 block 顶层，而是嵌在 content 对象里（stdout / stderr / is_error 三个键）。
+按原 preset 解析，所有 Bash 失败都会被当成成功——正是本工具专门在抓的那种「静默失败」。
+
+修法：
+
+1. error 支持路径数组：先看 is_error，再看 content.is_error，取第一个布尔值；
+2. asText 认识 stdout/stderr 结构，折成文本（否则静默失败检测没东西可查）；
+3. 补 4 条 Claude Code 措辞规则：String to replace not found in file、Found N matches of the string to replace、File has not been read yet、File has been modified since read。
+
+fixture 用真实形状重写（结构照真实案例，内容自造，不含任何第三方数据），测试 15 → 16 全过。

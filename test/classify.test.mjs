@@ -47,3 +47,9 @@ test('every cause maps to a group', () => {
     assert.ok(groupOf(c).length > 0);
   }
 });
+test('claude code wordings map to the same causes', () => {
+  assert.equal(classify(rec('String to replace not found in file.')), 'B-edit-no-match');
+  assert.equal(classify(rec('Found 3 matches of the string to replace')), 'B-edit-ambiguous');
+  assert.equal(classify(rec('File has not been read yet. Read it first before writing to it.')), 'A-edit-need-read');
+  assert.equal(classify(rec('File has been modified since read, either by the user or by a linter.')), 'A-edit-stale');
+});

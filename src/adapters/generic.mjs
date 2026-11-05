@@ -21,6 +21,9 @@ function getPath(obj, expr) {
 function asText(v) {
   if (v === undefined || v === null) return '';
   if (typeof v === 'string') return v;
+  if (typeof v === 'object' && !Array.isArray(v) && ('stdout' in v || 'stderr' in v)) {
+    return [v.stdout, v.stderr].filter((x) => typeof x === 'string' && x.length).join('\n');
+  }
   if (Array.isArray(v)) {
     let s = '';
     for (const x of v) {
@@ -94,7 +97,12 @@ export function makeAdapter(mapping) {
             if (id === undefined || id === null) continue;
             const call = calls.get(String(id)) || {};
             const text = asText(getPath(it, resultSpec.text));
-            let isErr = getPath(it, resultSpec.error) === true;
+            const errPaths = Array.isArray(resultSpec.error) ? resultSpec.error : (resultSpec.error ? [resultSpec.error] : []);
+            let isErr = false;
+            for (const p of errPaths) {
+              const v = getPath(it, p);
+              if (typeof v === 'boolean') { isErr = v; break; }
+            }
             if (!isErr && resultSpec.errorPattern) isErr = new RegExp(resultSpec.errorPattern, 'i').test(text);
             const model = call.m || getPath(o, resultSpec.model) || curModel;
             if (call.m) curModel = call.m;

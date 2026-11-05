@@ -1,9 +1,10 @@
 {
   "name": "claude-code",
-  "note": "Claude Code writes one JSONL per session under ~/.claude/projects. Tool results live in user turns and carry is_error. This preset is derived from the documented record shape; verify against your own logs with --list first.",
+  "note": "Claude Code writes one JSONL per session under ~/.claude/projects. Verified against public transcripts: tool_use / tool_result blocks, string or array content, and is_error either on the block or inside a {stdout,stderr,is_error} content object (Bash). Noise record types (file-history-snapshot, mode, world_state) are ignored automatically.",
   "root": "~/.claude/projects",
   "include": [
-    "**/*.jsonl"
+    "**/*.jsonl",
+    "**/*.jsonl.zst"
   ],
   "time": "timestamp",
   "records": [
@@ -31,7 +32,10 @@
         "type": "tool_result"
       },
       "id": "tool_use_id",
-      "error": "is_error",
+      "error": [
+        "is_error",
+        "content.is_error"
+      ],
       "text": "content"
     }
   ]
