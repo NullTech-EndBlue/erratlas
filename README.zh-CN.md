@@ -192,6 +192,7 @@ Codex 对 shell 调用**没有通用错误字段**，失败只能从 `Process ex
 --md [file]         直接出一份 markdown 报告
 --fail-over <pct>   失败率超过这个百分比就退出码 1（接 CI）
 --zh                中文标签
+--redact            脱敏：路径、邮箱、URL、IP、token、会话 id、项目名全换别名
 --demo              合成数据试跑
 ```
 

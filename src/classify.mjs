@@ -11,6 +11,7 @@ export function core(text) {
   let s = text || '';
   s = s.replace(/^Error: code run failed \((exception|timeout|abort|invalid-output|worker-exit)\):\s*/, '');
   s = s.replace(/^\s*ToolCallError:\s*/, '');
+  s = s.replace(/^Error:\s+/, '');
   s = s.replace(/\n\s*at [\s\S]*$/, '');
   return s.trim();
 }

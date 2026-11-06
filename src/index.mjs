@@ -5,3 +5,4 @@ export { analyze, toJson, toMarkdown, renderText } from './report.mjs';
 export { makeAdapter } from './adapters/generic.mjs';
 export * as dshAdapter from './adapters/dsh.mjs';
 export { defaultCachePath } from './cache.mjs';
+export { scrub, redactRecords } from './redact.mjs';

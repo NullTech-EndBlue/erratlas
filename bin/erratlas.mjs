@@ -8,6 +8,7 @@ import * as dsh from '../src/adapters/dsh.mjs';
 import { defaultCachePath } from '../src/cache.mjs';
 import { analyze, toJson, toMarkdown, renderText, renderDayText, renderSilentText, renderSessionsText } from '../src/report.mjs';
 import { classify, signature } from '../src/classify.mjs';
+import { redactRecords } from '../src/redact.mjs';
 
 const HELP = [
   'erratlas - anatomy of AI agent tool failures',
@@ -43,6 +44,7 @@ const HELP = [
   '  --detail            one raw sample per signature',
   '  --samples <n>       samples per signature with --detail (default 1)',
   '  --zh                Chinese labels, --tz <minutes> timezone offset (default: local)',
+  '  --redact            replace paths, emails, urls, ips, tokens, session ids and project names',
   '',
   'Machine output',
   '  --json [file]       JSON records (stdout when no file)',
@@ -80,6 +82,7 @@ function parseArgs(argv) {
       case '--sessions': o.sessions = true; break;
       case '--detail': o.detail = true; break;
       case '--zh': o.zh = true; break;
+      case '--redact': o.redact = true; break;
       case '--tz': o.tz = parseInt(take(i), 10); i++; break;
       case '--json': o.json = (take(i) && !take(i).startsWith('--')) ? take(i) : true; if (o.json !== true) i++; break;
       case '--md': o.md = (take(i) && !take(i).startsWith('--')) ? take(i) : true; if (o.md !== true) i++; break;
@@ -176,6 +179,11 @@ function main() {
   if (o.grep) {
     const re = new RegExp(o.grep, 'i');
     recs = recs.filter((r) => !r.ie || re.test(r.tx || ''));
+  }
+
+  if (o.redact) {
+    recs = redactRecords(recs);
+    stats = Object.assign({}, stats, { root: '<root>' });
   }
 
   const a = analyze(recs, { top: o.top, tzOffsetMin: o.tzOffsetMin });

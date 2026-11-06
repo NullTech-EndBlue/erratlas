@@ -140,6 +140,7 @@ and Codex CLI.
 --json [file] --md [file]                       machine output
 --fail-over <pct>   exit 1 above this failure rate
 --zh                Chinese labels
+--redact            replace paths, emails, URLs, IPs, tokens, session ids and project names
 ```
 
 ## Honest limits

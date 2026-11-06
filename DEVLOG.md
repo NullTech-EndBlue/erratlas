@@ -116,3 +116,16 @@ npm publish
 - 同一个版本号不能重发。改动后先改 `package.json` 的 version，再 `git tag v0.1.1`。
 - 发完验证：`npm view erratlas` / `npx erratlas --demo`。
 - `package.json` 里 `repository` 已指向 GitHub，npm 页面会自动关联。
+## 2026-11-06 · 脱敏（--redact）
+
+要给视频组一份能上屏的报告，加了 `--redact`：
+
+- 文本：Windows/Unix/UNC/`~/` 路径、邮箱、URL、IPv4、长哈希、疑似 token → `<path>` `<email>` `<url>` `<ip>` `<hex>` `<token>`；
+- 身份：会话 id → `S01`，项目目录名 → `project-a`，**按排序分配**，跨次运行稳定（同样的输入永远同样的别名）；
+- 扫描根路径也一起换掉（`root=<root>`）；
+- 分类跑在脱敏后的文本上——规则只看措辞不看路径，**总数和比例不变**（实测 35,217 / 1,241 两次一致）。
+
+顺手修了一个签名分裂：同一个失败因为有没有 `Error: ` 前缀被算成两行（49 + 44），
+在 `core()` 里统一剥掉开头 `Error: `，现在合并成 93。
+
+测试 17 → 20。产物：`优化/报告-erratlas-脱敏-2026-11-06.md` 和同名 `.txt`（中文标签版）。
